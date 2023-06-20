@@ -3,21 +3,21 @@ VALUES ('Sales'),
        ('Finance'),
        ('Engineering');
 
-INSERT INTO role (title, salary)
-VALUES ('Sales Lead',100000),
-       ('Salesperson',80000),
-       ('Lead Engineer',150000),
-       ('Software Engineer', 11000),
-       ('Accountant',80000),
-       ('Account Manager',100000);
+INSERT INTO role (title, salary,department_id)
+VALUES ('Sales Lead',100000,1),
+       ('Salesperson',80000,1),
+       ('Lead Engineer',150000,3),
+       ('Software Engineer', 11000,3),
+       ('Accountant',80000,2),
+       ('Account Manager',100000,2);
 
-INSERT INTO employee (first_name,last_name)
-VALUES ('John','Smith')
-       ('Mike','Pence')
-       ('Samantha','Douglas'),
-       ('Tony','Soprano'),
-       ('Tommy','Jackson'),
-       ('Alicia','Keyston'),
-       ('Zack','Morris'),
-       ('Christian','Bale'),
-       ('Angelina','Thomas');
+INSERT INTO employee (first_name,last_name,role_id,manager_id)
+VALUES ('John','Smith',1,1),
+       ('Mike','Pence',3,2),
+       ('Samantha','Douglas',6,3),
+       ('Tony','Soprano',2,null),
+       ('Tommy','Jackson',4,null),
+       ('Alicia','Keyston',5,null),
+       ('Zack','Morris',5,null),
+       ('Christian','Bale',2,null),
+       ('Angelina','Thomas',4,null);
