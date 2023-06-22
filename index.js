@@ -15,71 +15,84 @@
 // THEN I am prompted to select an employee to update and their new role and this information is updated in the database 
 
 const { prompt } = require('inquirer');
-const { default: Choice } = require('inquirer/lib/objects/choice');
 
 const mysql = require('mysql2');
 //connect to database
 const db = mysql.createConnection({
-    host:'localhost',
+    host: 'localhost',
     user: 'root',
     password: '1234',
     database: 'employees_db'
 }, console.log('connected to emplyees_db database'));
 
-// db.query('SELECT * FROM employee' ,(err,res) => {
-//     console.table(res);
-// });
-
-//give prompt selection
-//get the result from prompt, based on that, do what to do with the data.
-
-
 
 
 function mainMenu() {
-    const selection = 
-        {
-            type: 'list',
-            message: 'What would you like to do?',
-            name: 'answer',
-            choices:['View all Departments',
-        'View all Roles',
-        'View all Employees',
-        'Add a department',
-        'Add a role',
-        'Add an employee']
-        }
-    
-        prompt(selection)
-        .then((response) =>{
-        switch(response.answer){
-            case 'View all Departments':
-                viewDept();
-                break;
-            case 'View all Roles':
-                //view all roles function
-                break;
-            case 'Add a department':
-                //add a department function
-                break;
-            case 'Add a role':
-                //add a role function
-                break;
-            case 'Add an employee':
-                //add an employee function
-                break;
-                }
-         });
+    const selection =
+    {
+        type: 'list',
+        message: 'What would you like to do?',
+        name: 'answer',
+        choices: ['View all Departments',
+            'View all Roles',
+            'View all Employees',
+            'Add a department',
+            'Add a role',
+            'Add an employee']
+    }
+
+    prompt(selection)
+        .then((response) => {
+            switch (response.answer) {
+                case 'View all Departments':
+                    viewDept();
+                    break;
+                case 'View all Roles':
+                    //view all roles function
+                    viewRoles();
+                    break;
+                case 'Add a department':
+                    //add a department function
+                    addDepartment();
+                    break;
+                case 'Add a role':
+                    //add a role function
+                    break;
+                case 'Add an employee':
+                    //add an employee function
+                    break;
+            }
+        });
 }
 
 //show all departments
-function viewDept (){
-    db.query('SELECT * FROM department', (err,result) =>{
-                    console.table(result);
-                    mainMenu();
-                    });
+function viewDept() {
+    db.query('SELECT * FROM department', (err, result) => {
+        console.table(result);
+        mainMenu();
+    });
+}
+//show all roles
+function viewRoles() {
+    db.query('SELECT role.id, role.title, department.department_name, role.salary FROM role JOIN department ON role.department_id = department.id', (err, result) => {
+        console.table(result);
+        mainMenu();
+    });
 }
 
-
+//add a department
+function addDepartment(){
+    const add = {
+        type : 'input',
+        message: 'What is the name of the Department?',
+        name : 'name'
+    }
+    prompt(add)
+    .then((response) => {
+        db.query(`INSERT INTO department (department_name) VALUES ('${response.name}');`, (err, result) => {
+            mainMenu();
+        })
+    })
+}
 
 mainMenu();
