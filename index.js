@@ -57,6 +57,7 @@ function mainMenu() {
                     break;
                 case 'Add a role':
                     //add a role function
+                    addRole();
                     break;
                 case 'Add an employee':
                     //add an employee function
@@ -82,12 +83,12 @@ function viewRoles() {
 
 //add a department
 function addDepartment(){
-    const add = {
+    const add_department = {
         type : 'input',
         message: 'What is the name of the Department?',
         name : 'name'
     }
-    prompt(add)
+    prompt(add_department)
     .then((response) => {
         db.query(`INSERT INTO department (department_name) VALUES ('${response.name}');`, (err, result) => {
             mainMenu();
@@ -95,4 +96,39 @@ function addDepartment(){
     })
 }
 
+//add a role
+function addRole(){
+    let departments=[];
+    db.query('SELECT department_name FROM department;',(err,result) => {
+        result.forEach(element => {
+            departments.push(element.department_name);
+           
+        });
+
+       
+        const add_role = [{
+            type: 'input',
+            message: 'What is the title of the role?',
+            name: 'title'
+        },{
+            type: 'input',
+            message: 'How much is the salary>',
+            name: 'salary'
+        },{
+            type: 'list',
+            message: 'Which department does the role belong to?',
+            name: 'department',
+            choices: departments
+        }];
+        prompt(add_role)
+        .then( (response) => {
+            const id = departments.indexOf(response.department) + 1;
+            db.query(`INSERT INTO role (title, salary, department_id) VALUES ('${response.title}',${response.salary},${id});`, (err1,result1) => {
+                mainMenu();
+            })
+        })
+
+    })
+}
+//add an employee
 mainMenu();
