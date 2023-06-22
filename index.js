@@ -38,7 +38,8 @@ function mainMenu() {
             'View all Employees',
             'Add a department',
             'Add a role',
-            'Add an employee']
+            'Add an employee',
+            'Quit']
     }
 
     prompt(selection)
@@ -61,6 +62,7 @@ function mainMenu() {
                     break;
                 case 'Add an employee':
                     //add an employee function
+                    addEmployee();
                     break;
             }
         });
@@ -82,53 +84,103 @@ function viewRoles() {
 }
 
 //add a department
-function addDepartment(){
+function addDepartment() {
     const add_department = {
-        type : 'input',
+        type: 'input',
         message: 'What is the name of the Department?',
-        name : 'name'
+        name: 'name'
     }
     prompt(add_department)
-    .then((response) => {
-        db.query(`INSERT INTO department (department_name) VALUES ('${response.name}');`, (err, result) => {
-            mainMenu();
+        .then((response) => {
+            db.query(`INSERT INTO department (department_name) VALUES ('${response.name}');`, (err, result) => {
+                mainMenu();
+            })
         })
-    })
 }
 
 //add a role
-function addRole(){
-    let departments=[];
-    db.query('SELECT department_name FROM department;',(err,result) => {
+function addRole() {
+    let departments = [];
+    db.query('SELECT department_name FROM department;', (err, result) => {
         result.forEach(element => {
             departments.push(element.department_name);
-           
+
         });
 
-       
+
         const add_role = [{
             type: 'input',
             message: 'What is the title of the role?',
             name: 'title'
-        },{
+        }, {
             type: 'input',
             message: 'How much is the salary>',
             name: 'salary'
-        },{
+        }, {
             type: 'list',
             message: 'Which department does the role belong to?',
             name: 'department',
             choices: departments
         }];
         prompt(add_role)
-        .then( (response) => {
-            const id = departments.indexOf(response.department) + 1;
-            db.query(`INSERT INTO role (title, salary, department_id) VALUES ('${response.title}',${response.salary},${id});`, (err1,result1) => {
-                mainMenu();
+            .then((response) => {
+                const id = departments.indexOf(response.department) + 1;
+                db.query(`INSERT INTO role (title, salary, department_id) VALUES ('${response.title}',${response.salary},${id});`, (err1, result1) => {
+                    mainMenu();
+                })
             })
-        })
 
     })
 }
+
 //add an employee
+function addEmployee(){
+    //get the roles 
+    let roles = [];
+    let managers = ['None'];
+    db.query('SELECT title FROM role;', (err,result) => {
+        result.forEach(element => roles.push(element.title));
+        //get the employees and id for manager
+       db.query('SELECT first_name,last_name FROM employee', (err2,result2) => {
+
+        result2.forEach(person =>{
+            managers.push(person.first_name + ' ' +person.last_name);
+        })
+           const add_employee = [{
+               type: 'input',
+               message: 'What is the first name of the employee?',
+               name: 'firstName'
+           },{
+               type: 'input',
+               message: 'What is the last name of the employee?',
+               name: 'lastName'
+           },
+           {
+               type: 'list',
+               message: 'What is the role of the employee?',
+               name: 'role',
+               choices :roles
+           },
+           {
+               type: 'list',
+               message: 'Who is the manager of the employee?',
+               name: 'manager',
+               choices: managers
+           }];
+       
+           prompt(add_employee)
+           .then( (response) => {
+               
+               const roleId = roles.indexOf(response.role)+1;
+               
+               const managerId = response.manager === 'None' ? 'null' : managers.indexOf(response.manager);
+               console.log(managerId);
+
+               db.query(`INSERT INTO employee (first_name,last_name,role_id,manager_id) VALUES ('${response.firstName}','${response.lastName},${roleId},${managerId})`, (err3,result3) => mainMenu())
+           })
+
+       }) 
+
+})
+}
 mainMenu();
