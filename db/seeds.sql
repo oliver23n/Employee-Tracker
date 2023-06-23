@@ -12,12 +12,12 @@ VALUES ('Sales Lead',100000,1),
        ('Account Manager',100000,2);
 
 INSERT INTO employee (first_name,last_name,role_id,manager_id)
-VALUES ('John','Smith',1,1),
-       ('Mike','Pence',3,2),
-       ('Samantha','Douglas',6,3),
-       ('Tony','Soprano',2,null),
-       ('Tommy','Jackson',4,null),
-       ('Alicia','Keyston',5,null),
-       ('Zack','Morris',5,null),
-       ('Christian','Bale',2,null),
-       ('Angelina','Thomas',4,null);
+VALUES ('John','Smith',1,null),
+       ('Mike','Pence',3,null),
+       ('Samantha','Douglas',6,null),
+       ('Tony','Soprano',2,1),
+       ('Tommy','Jackson',4,2),
+       ('Alicia','Keyston',5,3),
+       ('Zack','Morris',5,3),
+       ('Christian','Bale',2,1),
+       ('Angelina','Thomas',4,2);

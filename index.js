@@ -1,19 +1,3 @@
-
-// WHEN I choose to view all departments
-// THEN I am presented with a formatted table showing department names and department ids
-// WHEN I choose to view all roles
-// THEN I am presented with the job title, role id, the department that role belongs to, and the salary for that role
-// WHEN I choose to view all employees
-// THEN I am presented with a formatted table showing employee data, including employee ids, first names, last names, job titles, departments, salaries, and managers that the employees report to
-// WHEN I choose to add a department
-// THEN I am prompted to enter the name of the department and that department is added to the database
-// WHEN I choose to add a role
-// THEN I am prompted to enter the name, salary, and department for the role and that role is added to the database
-// WHEN I choose to add an employee
-// THEN I am prompted to enter the employee’s first name, last name, role, and manager, and that employee is added to the database
-// WHEN I choose to update an employee role
-// THEN I am prompted to select an employee to update and their new role and this information is updated in the database 
-
 const { prompt } = require('inquirer');
 
 const mysql = require('mysql2');
@@ -39,6 +23,7 @@ function mainMenu() {
             'Add a department',
             'Add a role',
             'Add an employee',
+            'Update an employee',
             'Quit']
     }
 
@@ -52,6 +37,10 @@ function mainMenu() {
                     //view all roles function
                     viewRoles();
                     break;
+                case 'View all Employees':
+                    //view all employees function
+                    viewEmployees();
+                    break;
                 case 'Add a department':
                     //add a department function
                     addDepartment();
@@ -63,6 +52,10 @@ function mainMenu() {
                 case 'Add an employee':
                     //add an employee function
                     addEmployee();
+                    break;
+                case 'Update an employee':
+                    //add an employee function
+                    updateEmployee();
                     break;
             }
         });
@@ -125,6 +118,7 @@ function addRole() {
         prompt(add_role)
             .then((response) => {
                 const id = departments.indexOf(response.department) + 1;
+
                 db.query(`INSERT INTO role (title, salary, department_id) VALUES ('${response.title}',${response.salary},${id});`, (err1, result1) => {
                     mainMenu();
                 })
@@ -133,54 +127,116 @@ function addRole() {
     })
 }
 
+//view Employees
+function viewEmployees() {
+    db.query('SELECT e.id, e.first_name, e.last_name, role.title, department.department_name, role.salary, CONCAT(m.first_name, \' \', m.last_name) AS manager FROM employee e LEFT JOIN employee m ON e.manager_id = m.id JOIN role ON e.role_id = role.id JOIN department ON role.department_id = department.id; ', (err, result) => {
+        console.table(result);
+        mainMenu();
+    })
+}
+
 //add an employee
-function addEmployee(){
+function addEmployee() {
     //get the roles 
     let roles = [];
     let managers = ['None'];
-    db.query('SELECT title FROM role;', (err,result) => {
+    db.query('SELECT title FROM role;', (err, result) => {
         result.forEach(element => roles.push(element.title));
         //get the employees and id for manager
-       db.query('SELECT first_name,last_name FROM employee', (err2,result2) => {
+        db.query('SELECT first_name,last_name FROM employee', (err2, result2) => {
 
-        result2.forEach(person =>{
-            managers.push(person.first_name + ' ' +person.last_name);
+            result2.forEach(person => {
+                managers.push(person.first_name + ' ' + person.last_name);
+            })
+            const add_employee = [{
+                type: 'input',
+                message: 'What is the first name of the employee?',
+                name: 'firstName'
+            }, {
+                type: 'input',
+                message: 'What is the last name of the employee?',
+                name: 'lastName'
+            },
+            {
+                type: 'list',
+                message: 'What is the role of the employee?',
+                name: 'role',
+                choices: roles
+            },
+            {
+                type: 'list',
+                message: 'Who is the manager of the employee?',
+                name: 'manager',
+                choices: managers
+            }];
+
+            prompt(add_employee)
+                .then((response) => {
+
+                    const roleId = roles.indexOf(response.role) + 1;
+
+                    const managerId = response.manager === 'None' ? 'null' : managers.indexOf(response.manager);
+
+                    db.query(`INSERT INTO employee (first_name,last_name,role_id,manager_id) VALUES ('${response.firstName}','${response.lastName}',${roleId},${managerId})`, (err3, result3) => mainMenu())
+                })
+
         })
-           const add_employee = [{
-               type: 'input',
-               message: 'What is the first name of the employee?',
-               name: 'firstName'
-           },{
-               type: 'input',
-               message: 'What is the last name of the employee?',
-               name: 'lastName'
-           },
-           {
-               type: 'list',
-               message: 'What is the role of the employee?',
-               name: 'role',
-               choices :roles
-           },
-           {
-               type: 'list',
-               message: 'Who is the manager of the employee?',
-               name: 'manager',
-               choices: managers
-           }];
-       
-           prompt(add_employee)
-           .then( (response) => {
-               
-               const roleId = roles.indexOf(response.role)+1;
-               
-               const managerId = response.manager === 'None' ? 'null' : managers.indexOf(response.manager);
-               console.log(managerId);
 
-               db.query(`INSERT INTO employee (first_name,last_name,role_id,manager_id) VALUES ('${response.firstName}','${response.lastName},${roleId},${managerId})`, (err3,result3) => mainMenu())
-           })
-
-       }) 
-
-})
+    })
 }
+
+//update employee
+function updateEmployee() {
+    //get all employees
+    //get current role
+    //get all roles 
+    // prompt without the current
+    //update
+
+    let currentRole;
+    const employees = [];
+    const roles = [];
+    db.query('SELECT concat(employee.first_name,\' \',employee.last_name) as  name, role.title FROM employee JOIN role ON employee.role_id = role.id', (err, result) => {
+        result.forEach(element => {
+            employees.push(element.name)
+            if (roles.indexOf(element.title) === -1) {
+                roles.push(element.title);
+            }
+        })
+        const update_employee = {
+            type: "list",
+            message: "Which employee you want to update?",
+            name: "choice",
+            choices: employees
+        }
+        prompt(update_employee)
+            .then((response) => {
+                result.forEach(object => {
+                    if (object.name === response.choice) {
+                        currentRole = object.title;
+                    }
+                })
+                const role_prompt = {
+                    type: "list",
+                    message: "Which role do you want to assign to the employee?",
+                    name: 'roleChoice',
+                    choices: roles.filter(role => role !== currentRole)
+                }
+                prompt(role_prompt)
+
+                    .then((response1) => {
+                        db.query('SELECT role.id FROM role WHERE role.title = ?',response1.roleChoice , (err2,result2) =>{
+                          
+                            db.query(`UPDATE employee SET role_id=${result2[0].id} WHERE concat(employee.first_name,\' \',employee.last_name) ="${response.choice}";`,(err3,result3) => {
+                                mainMenu()
+                            })
+
+                        })
+                    })
+            })
+    })
+
+}
+
+
 mainMenu();
