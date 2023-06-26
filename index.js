@@ -1,4 +1,4 @@
-const { prompt } = require('inquirer');
+const { prompt, default: inquirer } = require('inquirer');
 
 const mysql = require('mysql2');
 //connect to database
@@ -57,6 +57,10 @@ function mainMenu() {
                     //add an employee function
                     updateEmployee();
                     break;
+                case 'Quit':
+                    //exit
+                    console.log('Exited prompt.')
+                    break;
             }
         });
 }
@@ -86,6 +90,7 @@ function addDepartment() {
     prompt(add_department)
         .then((response) => {
             db.query(`INSERT INTO department (department_name) VALUES ('${response.name}');`, (err, result) => {
+                console.log('Department added!');
                 mainMenu();
             })
         })
@@ -120,6 +125,7 @@ function addRole() {
                 const id = departments.indexOf(response.department) + 1;
 
                 db.query(`INSERT INTO role (title, salary, department_id) VALUES ('${response.title}',${response.salary},${id});`, (err1, result1) => {
+                    console.log('Role added!');
                     mainMenu();
                 })
             })
@@ -177,7 +183,9 @@ function addEmployee() {
 
                     const managerId = response.manager === 'None' ? 'null' : managers.indexOf(response.manager);
 
-                    db.query(`INSERT INTO employee (first_name,last_name,role_id,manager_id) VALUES ('${response.firstName}','${response.lastName}',${roleId},${managerId})`, (err3, result3) => mainMenu())
+                    db.query(`INSERT INTO employee (first_name,last_name,role_id,manager_id) VALUES ('${response.firstName}','${response.lastName}',${roleId},${managerId})`, (err3, result3) => {
+                        console.log('Employee added!');
+                        mainMenu()})
                 })
 
         })
@@ -187,11 +195,6 @@ function addEmployee() {
 
 //update employee
 function updateEmployee() {
-    //get all employees
-    //get current role
-    //get all roles 
-    // prompt without the current
-    //update
 
     let currentRole;
     const employees = [];
@@ -225,10 +228,11 @@ function updateEmployee() {
                 prompt(role_prompt)
 
                     .then((response1) => {
-                        db.query('SELECT role.id FROM role WHERE role.title = ?',response1.roleChoice , (err2,result2) =>{
-                          
-                            db.query(`UPDATE employee SET role_id=${result2[0].id} WHERE concat(employee.first_name,\' \',employee.last_name) ="${response.choice}";`,(err3,result3) => {
-                                mainMenu()
+                        db.query('SELECT role.id FROM role WHERE role.title = ?', response1.roleChoice, (err2, result2) => {
+
+                            db.query(`UPDATE employee SET role_id=${result2[0].id} WHERE concat(employee.first_name,\' \',employee.last_name) ="${response.choice}";`, (err3, result3) => {
+                                console.log('Employee updated!');
+                                mainMenu();
                             })
 
                         })
