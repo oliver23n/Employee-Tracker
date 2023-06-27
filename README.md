@@ -4,7 +4,7 @@
 
 ## Description
 
-Using the CLI and selecting an option from the provided options , this app allows ass to :
+Using the CLI and selecting an option from the provided options , this app allows you to :
 
 * View all the Departments from the Database,
 * View all the roles from the Database, 
